@@ -1,0 +1,61 @@
+# TheBestRecon .gitignore dosyası
+
+# Çıktı dizinleri
+output/
+*/output/
+**/output/
+
+# Geçici dosyalar
+temp/
+*/temp/
+**/temp/
+
+# Hassas konfigürasyon dosyaları
+config/config.json
+
+# Python sanal ortam
+venv/
+*/venv/
+**/venv/
+
+# Python geçici dosyaları
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.env
+.venv
+env/
+ENV/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Editör dosyaları
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# İşletim sistemi dosyaları
+.DS_Store
+*/.DS_Store
+**/.DS_Store
+Thumbs.db
+**/Thumbs.db
+desktop.ini
+**/desktop.ini
+
+# Kurulum dosyaları
+setup/
+*/setup/
+**/setup/
+
+# Loglar
+logs/
+*/logs/
+**/logs/
+*.log 
