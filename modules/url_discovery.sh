@@ -137,7 +137,7 @@ fi
 # 3. Katana ile URL keşfi
 if command -v katana &> /dev/null; then
     echo -e "${BLUE}[+] katana çalıştırılıyor...${NC}"
-    katana -list "$LIVE_DOMAINS_FILE" -d 5 -jc -jsl -kf all -aff -rl 15 -o "$URL_DISCOVERY_DIR/katanaURls.txt"   
+    katana -list "$LIVE_DOMAINS_FILE" -d 5 -jc -jsl -kf all -aff -rl 5 -o "$URL_DISCOVERY_DIR/katanaURls.txt"   
     KATANA_URLS=$(wc -l < "$URL_DISCOVERY_DIR/katanaURls.txt" 2>/dev/null || echo 0)
     echo -e "${GREEN}[+] katana tamamlandı: $KATANA_URLS URL bulundu${NC}"
 else

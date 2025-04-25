@@ -299,7 +299,7 @@ if command -v chopchop &> /dev/null; then
         echo -e "${GREEN}[+] ChopChop yapılandırma dosyası bulundu: $CHOPCHOP_CONFIG${NC}"
         
         # İstenen parametrelerle GoChopChop çalıştır (yapılandırma dosyası ile)
-        chopchop scan -u "$URL_LIST" -k --threads 5 --config "$CHOPCHOP_CONFIG" --export-filename "$VULN_SCAN_DIR/chopchop_vulns.txt"
+        chopchop scan -u "$URL_LIST" -k --threads 5 -c "$CHOPCHOP_CONFIG" --export-filename "$VULN_SCAN_DIR/chopchop_vulns.txt"
     else
         echo -e "${YELLOW}[!] ChopChop yapılandırma dosyası bulunamadı, indiriliyor...${NC}"
         

@@ -183,7 +183,8 @@ if $JS_DISCOVERY; then
         mkdir -p "$JS_DIR/js_files/downloaded_js"
         
         if command -v aria2c &> /dev/null; then
-            aria2c -d "$JS_DIR/js_files/downloaded_js" -i "$JS_DIR/js_files/all_js_urls.txt" --timeout=20 --max-tries=3 --retry-wait=3
+            aria2c -d "$JS_DIR/js_files/downloaded_js" -i "$JS_DIR/js_files/all_js_urls.txt" --timeout=20 --max-tries=3 --retry-wait=3 -j 1 --max-overall-download-limit=500K --split=1 --max-connection-per-server=1
+
             JS_FILES_COUNT=$(find "$JS_DIR/js_files/downloaded_js" -name "*.js" | wc -l)
             echo -e "${GREEN}[+] JavaScript dosyaları indirildi: $JS_FILES_COUNT dosya${NC}"
         else
