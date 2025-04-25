@@ -90,7 +90,7 @@ fi
 # pipx kullanabilmek için PATH'i güncelleyelim
 export PATH="$HOME/.local/bin:$PATH"
 # httpx ile python httpx karışmaması için python environmentinde olan kaldıralım.
-pip uninstall httpx 
+pip uninstall -y httpx 
 
 if ! command -v go &> /dev/null; then
     echo -e "${BLUE}[+] Installing Go...${NC}"
@@ -139,9 +139,15 @@ mkdir -p "$SCRIPT_DIR/setup"
 # Create array to track installation failures
 declare -a failed_tools
 
+
 # Install aria2 for JavaScript downloads
-echo -e "${BLUE}[+] Installing aria2...${NC}"
-sudo apt install -y aria2
+echo -e "${BLUE}[+] Checking aria2...${NC}"
+if ! command -v aria2c &> /dev/null; then
+    echo -e "${BLUE}[+] Installing aria2...${NC}"
+    sudo apt install -y aria2
+else
+    echo -e "${GREEN}[+] aria2 is already installed${NC}"
+fi
 
 # Install Go tools
 echo -e "${BLUE}[+] Installing Go tools...${NC}"
@@ -651,7 +657,8 @@ else
 fi
 
 # Lazy-Hunter - Security scanner
-if [ -L "/usr/local/bin/lazyhunter" ]; then
+echo -e "${BLUE}[+] Checking Lazy-Hunter...${NC}"
+if [ -L "/usr/local/bin/lazyhunter" ] && [ -d "$SCRIPT_DIR/setup/Lazy-Hunter" ]; then
     echo -e "${GREEN}[+] Lazy-Hunter is already installed${NC}"
 else
     echo -e "${BLUE}[+] Installing Lazy-Hunter...${NC}"
@@ -707,7 +714,8 @@ else
 fi
 
 # Smuggler - HTTP request smuggling tool
-if [ -L "/usr/local/bin/smuggler" ]; then
+echo -e "${BLUE}[+] Checking Smuggler...${NC}"
+if [ -L "/usr/local/bin/smuggler" ] && [ -d "$SCRIPT_DIR/setup/smuggler" ]; then
     echo -e "${GREEN}[+] Smuggler is already installed${NC}"
 else
     echo -e "${BLUE}[+] Installing Smuggler...${NC}"
@@ -784,7 +792,8 @@ else
 fi
 
 # GitDorker - GitHub dork scanner
-if [ -L "/usr/local/bin/gitdorker" ]; then
+echo -e "${BLUE}[+] Checking GitDorker...${NC}"
+if [ -L "/usr/local/bin/gitdorker" ] && [ -d "$SCRIPT_DIR/setup/GitDorker" ]; then
     echo -e "${GREEN}[+] GitDorker is already installed${NC}"
 else
     echo -e "${BLUE}[+] Installing GitDorker...${NC}"
@@ -828,7 +837,8 @@ else
 fi
 
 # XSStrike - XSS scanner
-if [ -L "/usr/local/bin/xsstrike" ]; then
+echo -e "${BLUE}[+] Checking XSStrike...${NC}"
+if [ -L "/usr/local/bin/xsstrike" ] && [ -d "$SCRIPT_DIR/setup/XSStrike" ]; then
     echo -e "${GREEN}[+] XSStrike is already installed${NC}"
 else
     echo -e "${BLUE}[+] Installing XSStrike...${NC}"
@@ -870,7 +880,8 @@ else
 fi
 
 # Pinkerton - GitHub secret scanner
-if [ -L "/usr/local/bin/pinkerton" ]; then
+echo -e "${BLUE}[+] Checking Pinkerton...${NC}"
+if [ -L "/usr/local/bin/pinkerton" ] && [ -d "$SCRIPT_DIR/setup/Pinkerton" ]; then
     echo -e "${GREEN}[+] Pinkerton is already installed${NC}"
 else
     echo -e "${BLUE}[+] Installing Pinkerton...${NC}"
@@ -918,7 +929,8 @@ else
 fi
 
 # JSScanner - JavaScript scanner
-if [ -L "/usr/local/bin/jsscanner" ]; then
+echo -e "${BLUE}[+] Checking JSScanner...${NC}"
+if [ -L "/usr/local/bin/jsscanner" ] && [ -d "$SCRIPT_DIR/setup/JSScanner" ]; then
     echo -e "${GREEN}[+] JSScanner is already installed${NC}"
 else
     echo -e "${BLUE}[+] Installing JSScanner...${NC}"
@@ -960,7 +972,8 @@ else
 fi
 
 # SecretFinder - Find secrets in JavaScript files
-if [ -L "/usr/local/bin/secretfinder" ]; then
+echo -e "${BLUE}[+] Checking SecretFinder...${NC}"
+if [ -L "/usr/local/bin/secretfinder" ] && [ -d "$SCRIPT_DIR/setup/secretfinder" ]; then
     echo -e "${GREEN}[+] SecretFinder is already installed${NC}"
 else
     echo -e "${BLUE}[+] Installing SecretFinder...${NC}"
@@ -1002,7 +1015,8 @@ else
 fi
 
 # LinkFinder - Find links in JavaScript files
-if [ -L "/usr/local/bin/linkfinder" ]; then
+echo -e "${BLUE}[+] Checking LinkFinder...${NC}"
+if [ -L "/usr/local/bin/linkfinder" ] && [ -d "$SCRIPT_DIR/setup/LinkFinder" ]; then
     echo -e "${GREEN}[+] LinkFinder is already installed${NC}"
 else
     echo -e "${BLUE}[+] Installing LinkFinder...${NC}"
@@ -1016,8 +1030,8 @@ else
             echo -e "${GREEN}[+] LinkFinder symlink created successfully${NC}"
             
             # Web tarayıcı açma özelliklerini devre dışı bırak
-            sed -i 's/webbrowser.open/#webbrowser.open\n/g' "$SCRIPT_DIR/setup/LinkFinder/linkfinder.py"
-            sed -i 's/subprocess.call(\["xdg-open"/#subprocess.call(\["xdg-open"\n/g' "$SCRIPT_DIR/setup/LinkFinder/linkfinder.py"
+            sed -i 's/webbrowser.open(file)/#webbrowser.open(file)\neprint("")/g' "$SCRIPT_DIR/setup/LinkFinder/linkfinder.py"
+            sed -i 's/subprocess.call(["xdg-open", file])/#subprocess.call(["xdg-open", file])\nprint("")/g' "$SCRIPT_DIR/setup/LinkFinder/linkfinder.py"
             echo -e "${GREEN}[+] LinkFinder web tarayıcı açma özellikleri devre dışı bırakıldı${NC}"
         else
             echo -e "${RED}[-] LinkFinder script or requirements not found in the directory${NC}"
@@ -1062,7 +1076,8 @@ else
 fi
 
 # CORScanner - CORS misconfiguration scanner
-if [ -L "/usr/local/bin/corsscanner" ]; then
+echo -e "${BLUE}[+] Checking CORScanner...${NC}"
+if [ -L "/usr/local/bin/corsscanner" ] && [ -d "$SCRIPT_DIR/setup/CORScanner" ]; then
     echo -e "${GREEN}[+] CORScanner is already installed${NC}"
 else
     echo -e "${BLUE}[+] Installing CORScanner...${NC}"
@@ -1152,7 +1167,8 @@ else
 fi
 
 # Sublist3rV2 - Subdomain enumeration
-if [ -L "/usr/local/bin/sublist3r" ]; then
+echo -e "${BLUE}[+] Checking Sublist3rV2...${NC}"
+if [ -L "/usr/local/bin/sublist3r" ] && [ -d "$SCRIPT_DIR/setup/sublist3rV2" ]; then
     echo -e "${GREEN}[+] Sublist3rV2 is already installed${NC}"
 else
     echo -e "${BLUE}[+] Installing Sublist3rV2...${NC}"

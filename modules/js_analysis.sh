@@ -65,7 +65,7 @@ fi
 # 1. TruffleHog ile JavaScript dosyalarında gizli bilgiler ara
 if command -v trufflehog &> /dev/null && [ -d "$JS_FILES_DIR" ]; then
     echo -e "${BLUE}[+] TruffleHog çalıştırılıyor...${NC}"
-    trufflehog filesystem "$JS_FILES_DIR" | tee "$JS_ANALYSIS_DIR/trufflehog_results.txt"
+    trufflehog filesystem "$JS_FILES_DIR" --only-verified  --include-detectors=all | tee "$JS_ANALYSIS_DIR/trufflehog_results.txt"
     if [ -s "$JS_ANALYSIS_DIR/trufflehog_results.txt" ]; then
         echo -e "${GREEN}[+] TruffleHog tamamlandı: Sonuçlar trufflehog_results.txt dosyasına kaydedildi${NC}"
     else
@@ -81,13 +81,13 @@ if [ -d "$JS_FILES_DIR" ]; then
     echo -e "${BLUE}[+] JavaScript dosyalarında regex ile duyarlı bilgiler aranıyor...${NC}"
 
     # API anahtarları, tokenlar, şifreler vs. için regex listesi (sadece eşleşen kısmı göster)
-    grep -r -i -o -E "api[_-]?key\s*[:=]\s*['\"]?[A-Za-z0-9_\-]{8,}['\"]?|secret[_-]?key\s*[:=]\s*['\"]?[A-Za-z0-9_\-]{8,}['\"]?|password\s*[:=]\s*['\"]?[A-Za-z0-9!@#$%^&*()_+\-]{6,}['\"]?|auth[_-]?token\s*[:=]\s*['\"]?[A-Za-z0-9\-_=]+\.[A-Za-z0-9\-_=]+\.[A-Za-z0-9\-_=]+['\"]?" "$JS_FILES_DIR" | tee "$JS_ANALYSIS_DIR/regex_results_sensitive_strings.txt"
+    grep -r -i -o -E "api[_-]?key\s*[:=]\s*['\"]?[A-Za-z0-9_\-]{8,}['\"]?|secret[_-]?key\s*[:=]\s*['\"]?[A-Za-z0-9_\-]{8,}['\"]?|password\s*[:=]\s*['\"]?[A-Za-z0-9!@#$%^&*()_+\-]{6,}['\"]?|auth[_-]?token\s*[:=]\s*['\"]?[A-Za-z0-9\-_=]+\.[A-Za-z0-9\-_=]+\.[A-Za-z0-9\-_=]+['\"]?" "$JS_FILES_DIR" > "$JS_ANALYSIS_DIR/regex_results_sensitive_strings.txt"
 
     # URL'ler için regex
-    grep -r -i -o -E "https?://[a-zA-Z0-9./?=_-]{10,}" "$JS_FILES_DIR" | tee "$JS_ANALYSIS_DIR/regex_results_urls.txt"
+    grep -r -i -o -E "https?://[a-zA-Z0-9./?=_-]{10,}" "$JS_FILES_DIR" > "$JS_ANALYSIS_DIR/regex_results_urls.txt"
 
     # Endpoint'ler için regex
-    grep -r -i -o -E "/api/[a-zA-Z0-9/_-]{2,}" "$JS_FILES_DIR" | tee "$JS_ANALYSIS_DIR/regex_results_endpoints.txt"
+    grep -r -i -o -E "/api/[a-zA-Z0-9/_-]{2,}" "$JS_FILES_DIR" > "$JS_ANALYSIS_DIR/regex_results_endpoints.txt"
 
     REGEX_HITS=$(wc -l < "$JS_ANALYSIS_DIR/regex_results_sensitive_strings.txt" 2>/dev/null || echo 0)
     echo -e "${GREEN}[+] Regex araması tamamlandı: $REGEX_HITS potansiyel duyarlı bilgi bulundu${NC}"

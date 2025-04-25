@@ -81,7 +81,7 @@ show_help() {
     echo -e "  ${CYAN}--js-analysis, -jS${NC}           JavaScript dosyalarında değerli veriler aranır. (TruffleHog, Linkfinder, Grep)"
     echo -e "  ${CYAN}--param-analysis, -pmS${NC}        Parametreler üzerinde XSS zafiyet tespiti yapar (KXSS, Dalfox, XSStrike)"
     echo -e "  ${CYAN}--port-scan, -pS${NC}             Port tarama çalıştır (nmap, masscan, naabu)"
-    echo -e "  ${CYAN}--vuln-scan, -vS${NC}             Zafiyet tarama çalıştır (nuclei, nikto, corscanner, smuggler, bfac)"
+    echo -e "  ${CYAN}--vuln-scan, -vS${NC}             Zafiyet tarama çalıştır (nuclei, corscanner, smuggler, bfac)"
     echo ""
     echo -e "${YELLOW}Örnekler:${NC}"
     echo -e "  ${CYAN}$0 -d example.com -sE -pS${NC}"
