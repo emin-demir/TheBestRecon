@@ -1,6 +1,10 @@
 # TheBestRecon
 A system that makes all the work easier by using Recon, Discovery, Port scan, Vulnerability scan tools and running them all in a compatible way.
 
+# Methodology
+
+![Methodology](https://github.com/user-attachments/assets/325a0c20-b50e-4364-9a9c-d69f10999e9f)
+
 ### Why?
 I looked at the market and couldn't find a single automated tool that could run all of them, so I decided to make one myself.
 
