@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Subdomain Bruteforce Modülü
-# TheBestRecon - DNS ve Subdomain Bruteforce birleştirilmiş
+# Subdomain Bruteforce Module
+# TheBestRecon - Combined DNS and Subdomain Bruteforce
 
-# Renk tanımlamaları
+# Color definitions
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 BLUE='\033[0;34m'
@@ -11,13 +11,13 @@ YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
 NC='\033[0m'
 
-# Başlangıç zamanını kaydet
+# Save start time
 START_TIME=$(date +%s)
 
-# Varsayılan değerler
+# Default values
 OUTPUT_DIR=""
 
-# Parametreleri işle
+# Process parameters
 while [[ $# -gt 0 ]]; do
     key="$1"
     case $key in
@@ -33,39 +33,39 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Domain parametresi kontrolü
+# Domain parameter check
 if [ -z "$DOMAIN" ]; then
-    echo -e "${RED}[-] Domain parametresi gerekli${NC}"
-    echo "Kullanım: $0 <domain> [-o output_dir]"
+    echo -e "${RED}[-] Domain parameter is required${NC}"
+    echo "Usage: $0 <domain> [-o output_dir]"
     exit 1
 fi
 
-# Output dizininde subdomain_brute klasörü oluştur
+# Create subdomain_brute directory in output directory
 SUBDOMAIN_BRUTE_DIR="${OUTPUT_DIR}/subdomain_brute"
 mkdir -p "$SUBDOMAIN_BRUTE_DIR"
 
-echo -e "${GREEN}###------- Subdomain ve DNS bruteforce başlatılıyor: $DOMAIN -------###${NC}"
-echo -e "${BLUE}[+] Çıktılar şu dizine kaydedilecek: $SUBDOMAIN_BRUTE_DIR${NC}"
+echo -e "${GREEN}###------- Starting subdomain and DNS bruteforce: $DOMAIN -------###${NC}"
+echo -e "${BLUE}[+] Results will be saved to: $SUBDOMAIN_BRUTE_DIR${NC}"
 
-# 1. Gobuster ile subdomain bruteforce
-echo -e "${BLUE}[+] Gobuster çalıştırılıyor...${NC}"
+# 1. Subdomain bruteforce with Gobuster
+echo -e "${BLUE}[+] Running Gobuster...${NC}"
 if command -v ffuf &> /dev/null; then
     gobuster dns -d ${DOMAIN} -w /usr/share/wordlists/seclists/Discovery/DNS/subdomains-top1million-5000.txt -o "$SUBDOMAIN_BRUTE_DIR/gobuster_subs_${DOMAIN}_dont_merge.txt" --delay 200ms --no-color -t 5
     if [ -f "$SUBDOMAIN_BRUTE_DIR/gobuster_subs_${DOMAIN}_dont_merge.txt" ]; then
         cat "$SUBDOMAIN_BRUTE_DIR/gobuster_subs_${DOMAIN}_dont_merge.txt" | cut -d ' ' -f2 > gobuster_${DOMAIN}.txt
-        echo -e "${GREEN}[+] Gobuster tamamlandı: $(wc -l < "$SUBDOMAIN_BRUTE_DIR/gobuster_${DOMAIN}.txt") subdomain bulundu${NC}"
+        echo -e "${GREEN}[+] Gobuster completed: $(wc -l < "$SUBDOMAIN_BRUTE_DIR/gobuster_${DOMAIN}.txt") subdomains found${NC}"
     fi
 else
-    echo -e "${RED}[-] Gobuster bulunamadı${NC}"
+    echo -e "${RED}[-] Gobuster not found${NC}"
 fi
 
-# 2. Shuffledns ile DNS bruteforce
-echo -e "${BLUE}[+] shuffledns çalıştırılıyor...${NC}"
+# 2. DNS bruteforce with shuffledns
+echo -e "${BLUE}[+] Running shuffledns...${NC}"
 if command -v shuffledns &> /dev/null; then
-    # Resolver dosyasını kontrol et
+    # Check resolver file
     RESOLVER_FILE="$OUTPUT_DIR/../../config/resolvers.txt"
     if [ ! -f "$RESOLVER_FILE" ]; then
-        echo -e "${YELLOW}[!] Resolver dosyası ($RESOLVER_FILE) bulunamadı, oluşturuluyor...${NC}"
+        echo -e "${YELLOW}[!] Resolver file ($RESOLVER_FILE) not found, creating...${NC}"
         wget -O "$RESOLVER_FILE" https://raw.githubusercontent.com/janmasarik/resolvers/master/resolvers.txt
     fi
 
@@ -77,50 +77,50 @@ if command -v shuffledns &> /dev/null; then
                -wt 50 \
                -t 100 -v
     
-    echo -e "${GREEN}[+] shuffledns tamamlandı: $(wc -l < "$SUBDOMAIN_BRUTE_DIR/shuffledns_${DOMAIN}.txt") subdomain bulundu${NC}"
+    echo -e "${GREEN}[+] shuffledns completed: $(wc -l < "$SUBDOMAIN_BRUTE_DIR/shuffledns_${DOMAIN}.txt") subdomains found${NC}"
 else
-    echo -e "${RED}[-] shuffledns bulunamadı${NC}"
+    echo -e "${RED}[-] shuffledns not found${NC}"
 fi
 
-# 3. Tüm sonuçları birleştir
-echo -e "${BLUE}[+] Tüm bruteforce sonuçları birleştiriliyor...${NC}"
-# Gobuster çıktılarını birleştir
+# 3. Merge all results
+echo -e "${BLUE}[+] Merging all bruteforce results...${NC}"
+# Merge Gobuster outputs
 cat "$SUBDOMAIN_BRUTE_DIR"/*_"${DOMAIN}.txt" 2>/dev/null | sort -u > "$SUBDOMAIN_BRUTE_DIR/all_brute_subdomains_${DOMAIN}.txt"
 
-echo -e "${GREEN}[+] Toplam $(wc -l < "$SUBDOMAIN_BRUTE_DIR/all_brute_subdomains_${DOMAIN}.txt") benzersiz subdomain bulundu${NC}"
+echo -e "${GREEN}[+] Total $(wc -l < "$SUBDOMAIN_BRUTE_DIR/all_brute_subdomains_${DOMAIN}.txt") unique subdomains found${NC}"
 
-# 4. DNSX ile canlı subdomainleri kontrol et
-echo -e "${BLUE}[+] dnsx ile canlı subdomain kontrolü yapılıyor...${NC}"
+# 4. Check live subdomains with DNSX
+echo -e "${BLUE}[+] Checking live subdomains with dnsx...${NC}"
 if command -v dnsx &> /dev/null; then
-    # Subdomain enum sonuçlarını da kontrol et
+    # Also check subdomain enum results
     if [ -f "$OUTPUT_DIR/subdomain_enum/all_subdomains_${DOMAIN}.txt" ]; then
-        echo -e "${BLUE}[+] Subdomain enumeration sonuçları da dnsx kontrolüne dahil ediliyor...${NC}"
+        echo -e "${BLUE}[+] Including subdomain enumeration results in dnsx check...${NC}"
         cat "$OUTPUT_DIR/subdomain_enum/all_subdomains_${DOMAIN}.txt" "$SUBDOMAIN_BRUTE_DIR/all_brute_subdomains_${DOMAIN}.txt" | \
         sort -u > "$SUBDOMAIN_BRUTE_DIR/combined_subdomains_${DOMAIN}.txt"
     else
         cp "$SUBDOMAIN_BRUTE_DIR/all_brute_subdomains_${DOMAIN}.txt" "$SUBDOMAIN_BRUTE_DIR/combined_subdomains_${DOMAIN}.txt"
     fi
     
-    # DNS sorgusu çalıştır ve ham sonuçları kaydet
+    # Run DNS query and save raw results
     cat "$SUBDOMAIN_BRUTE_DIR/combined_subdomains_${DOMAIN}.txt" | \
         dnsx -r "$RESOLVER_FILE" -a -resp -o "$SUBDOMAIN_BRUTE_DIR/dnsx_raw_${DOMAIN}.txt" -nc
     
-    # Sadece subdomainleri ayır (1. sütun)
+    # Extract only subdomains (1st column)
     cat "$SUBDOMAIN_BRUTE_DIR/dnsx_raw_${DOMAIN}.txt" | cut -d ' ' -f1 | sort -u > "$SUBDOMAIN_BRUTE_DIR/dnsx_live_subdomains_${DOMAIN}.txt"
     
-    # IP adreslerini ayır (3. sütun) ve parantezleri kaldır
+    # Extract IP addresses (3rd column) and remove brackets
     cat "$SUBDOMAIN_BRUTE_DIR/dnsx_raw_${DOMAIN}.txt" | cut -d ' ' -f3 | sed 's/\[\(.*\)\]/\1/g' | sort -u > "$SUBDOMAIN_BRUTE_DIR/dnsx_ips_${DOMAIN}.txt"
     
     LIVE_SUBDOMAINS=$(wc -l < "$SUBDOMAIN_BRUTE_DIR/dnsx_live_subdomains_${DOMAIN}.txt")
     IP_COUNT=$(wc -l < "$SUBDOMAIN_BRUTE_DIR/dnsx_ips_${DOMAIN}.txt")
     
-    echo -e "${GREEN}[+] dnsx tamamlandı: $LIVE_SUBDOMAINS canlı subdomain ve $IP_COUNT benzersiz IP adresi bulundu${NC}"
+    echo -e "${GREEN}[+] dnsx completed: $LIVE_SUBDOMAINS live subdomains and $IP_COUNT unique IP addresses found${NC}"
 else
-    echo -e "${RED}[-] dnsx bulunamadı${NC}"
+    echo -e "${RED}[-] dnsx not found${NC}"
     cp "$SUBDOMAIN_BRUTE_DIR/combined_subdomains_${DOMAIN}.txt" "$OUTPUT_DIR/" 2>/dev/null
 fi
 
-# Süre formatı fonksiyonu
+# Time format function
 format_time() {
     local seconds=$1
     local minutes=$((seconds / 60))
@@ -130,10 +130,10 @@ format_time() {
     printf "%02d:%02d:%02d" $hours $minutes $seconds
 }
 
-# Modül sonunda toplam süreyi hesapla ve göster
+# Calculate and show total time at the end of the module
 END_TIME=$(date +%s)
 TOTAL_TIME=$((END_TIME - START_TIME))
 TOTAL_TIME_FORMATTED=$(format_time $TOTAL_TIME)
-echo -e "${CYAN}[+] Toplam subdomain brute force süresi: ${TOTAL_TIME_FORMATTED}${NC}"
+echo -e "${CYAN}[+] Total subdomain bruteforce time: ${TOTAL_TIME_FORMATTED}${NC}"
 
-echo -e "${GREEN}###------- Subdomain Bruteforce tamamlandı: $DOMAIN - Toplam $TOTAL_SUBDOMAINS benzersiz subdomain bulundu -------###${NC}" 
+echo -e "${GREEN}###------- Subdomain Bruteforce completed: $DOMAIN - Total $TOTAL_SUBDOMAINS unique subdomains found -------###${NC}" 

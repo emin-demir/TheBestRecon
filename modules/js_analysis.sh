@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# JavaScript Analiz Modülü
+# JavaScript Analysis Module
 # TheBestRecon
 
-# Renk tanımlamaları
+# Color definitions
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 BLUE='\033[0;34m'
@@ -11,10 +11,10 @@ YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
 NC='\033[0m'
 
-# Başlangıç zamanını kaydet
+# Save start time
 START_TIME=$(date +%s)
 
-# Parametreleri işle
+# Process parameters
 while [[ $# -gt 0 ]]; do
     key="$1"
     case $key in
@@ -30,74 +30,73 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Domain parametresi kontrolü
+# Domain parameter check
 if [ -z "$DOMAIN" ]; then
-    echo -e "${RED}[-] Domain parametresi gerekli${NC}"
-    echo "Kullanım: $0 <domain> [-o output_dir]"
+    echo -e "${RED}[-] Domain parameter is required${NC}"
+    echo "Usage: $0 <domain> [-o output_dir]"
     exit 1
 fi
 
-# Output dizinini belirle
+# Set output directory
 if [ -z "$OUTPUT_DIR" ]; then
     OUTPUT_DIR="output/${DOMAIN}_$(date +%Y%m%d_%H%M%S)"
 fi
 
-# JavaScript analizi için dizin oluştur
+# Create directory for JavaScript analysis
 JS_ANALYSIS_DIR="${OUTPUT_DIR}/js_analysis"
 mkdir -p "$JS_ANALYSIS_DIR"
 
-echo -e "${GREEN}###------- JavaScript Analizi başlatılıyor: $DOMAIN -------###${NC}"
-echo -e "${BLUE}[+] Çıktılar şu dizine kaydedilecek: $JS_ANALYSIS_DIR${NC}"
+echo -e "${GREEN}###------- Starting JavaScript Analysis: $DOMAIN -------###${NC}"
+echo -e "${BLUE}[+] Results will be saved to: $JS_ANALYSIS_DIR${NC}"
 
-# JS Discovery modülünden indirilen JS dosyalarını kontrol et
+# Check JavaScript files downloaded from JS Discovery module
 JS_FILES_DIR=""
 if [ -d "${OUTPUT_DIR}/js_param_discovery/js_files/downloaded_js" ]; then
     JS_FILES_DIR="${OUTPUT_DIR}/js_param_discovery/js_files/downloaded_js"
-    echo -e "${BLUE}[+] JS Discovery modülünden indirilen JavaScript dosyaları kullanılıyor${NC}"
+    echo -e "${BLUE}[+] Using JavaScript files downloaded from JS Discovery module${NC}"
     JS_FILES_COUNT=$(find "$JS_FILES_DIR" -name "*.js" | wc -l)
-    echo -e "${GREEN}[+] $JS_FILES_COUNT JavaScript dosyası analiz edilecek${NC}"
+    echo -e "${GREEN}[+] $JS_FILES_COUNT JavaScript files will be analyzed${NC}"
 else
-    echo -e "${YELLOW}[!] Önceden indirilmiş JavaScript dosyaları bulunamadı${NC}"
-    echo -e "${YELLOW}[!] Önce --js-discovery parametresi ile js_and_param_discovery.sh çalıştırın${NC}"
-
+    echo -e "${YELLOW}[!] No previously downloaded JavaScript files found${NC}"
+    echo -e "${YELLOW}[!] Please run js_and_param_discovery.sh with --js-discovery parameter first${NC}"
 fi
 
-# 1. TruffleHog ile JavaScript dosyalarında gizli bilgiler ara
+# 1. Search for secrets in JavaScript files with TruffleHog
 if command -v trufflehog &> /dev/null && [ -d "$JS_FILES_DIR" ]; then
-    echo -e "${BLUE}[+] TruffleHog çalıştırılıyor...${NC}"
+    echo -e "${BLUE}[+] Running TruffleHog...${NC}"
     trufflehog filesystem "$JS_FILES_DIR" --only-verified  --include-detectors=all | tee "$JS_ANALYSIS_DIR/trufflehog_results.txt"
     if [ -s "$JS_ANALYSIS_DIR/trufflehog_results.txt" ]; then
-        echo -e "${GREEN}[+] TruffleHog tamamlandı: Sonuçlar trufflehog_results.txt dosyasına kaydedildi${NC}"
+        echo -e "${GREEN}[+] TruffleHog completed: Results saved to trufflehog_results.txt${NC}"
     else
-        echo -e "${YELLOW}[!] TruffleHog herhangi bir gizli bilgi bulamadı${NC}"
+        echo -e "${YELLOW}[!] TruffleHog did not find any secrets${NC}"
         rm "$JS_ANALYSIS_DIR/trufflehog_results.txt" 2>/dev/null
     fi
 else
-    echo -e "${RED}[-] TruffleHog bulunamadı veya JavaScript dosyaları mevcut değil${NC}"
+    echo -e "${RED}[-] TruffleHog not found or JavaScript files not available${NC}"
 fi
 
-# 2. JS dosyalarında regex ile sensistif bilgiler ara
+# 2. Search for sensitive information in JS files using regex
 if [ -d "$JS_FILES_DIR" ]; then
-    echo -e "${BLUE}[+] JavaScript dosyalarında regex ile duyarlı bilgiler aranıyor...${NC}"
+    echo -e "${BLUE}[+] Searching for sensitive information in JavaScript files using regex...${NC}"
 
-    # API anahtarları, tokenlar, şifreler vs. için regex listesi (sadece eşleşen kısmı göster)
+    # Regex list for API keys, tokens, passwords etc. (show only matching part)
     grep -r -i -o -E "api[_-]?key\s*[:=]\s*['\"]?[A-Za-z0-9_\-]{8,}['\"]?|secret[_-]?key\s*[:=]\s*['\"]?[A-Za-z0-9_\-]{8,}['\"]?|password\s*[:=]\s*['\"]?[A-Za-z0-9!@#$%^&*()_+\-]{6,}['\"]?|auth[_-]?token\s*[:=]\s*['\"]?[A-Za-z0-9\-_=]+\.[A-Za-z0-9\-_=]+\.[A-Za-z0-9\-_=]+['\"]?" "$JS_FILES_DIR" > "$JS_ANALYSIS_DIR/regex_results_sensitive_strings.txt"
 
-    # URL'ler için regex
+    # Regex for URLs
     grep -r -i -o -E "https?://[a-zA-Z0-9./?=_-]{10,}" "$JS_FILES_DIR" > "$JS_ANALYSIS_DIR/regex_results_urls.txt"
 
-    # Endpoint'ler için regex
+    # Regex for endpoints
     grep -r -i -o -E "/api/[a-zA-Z0-9/_-]{2,}" "$JS_FILES_DIR" > "$JS_ANALYSIS_DIR/regex_results_endpoints.txt"
 
     REGEX_HITS=$(wc -l < "$JS_ANALYSIS_DIR/regex_results_sensitive_strings.txt" 2>/dev/null || echo 0)
-    echo -e "${GREEN}[+] Regex araması tamamlandı: $REGEX_HITS potansiyel duyarlı bilgi bulundu${NC}"
+    echo -e "${GREEN}[+] Regex search completed: $REGEX_HITS potential sensitive information found${NC}"
 else
-    echo -e "${RED}[-] JavaScript dosyaları mevcut değil${NC}"
+    echo -e "${RED}[-] JavaScript files not available${NC}"
 fi
 
-# 3. LinkFinder ile JS dosyalarından endpoint çıkar
+# 3. Extract endpoints from JS files using LinkFinder
 if command -v linkfinder &> /dev/null  && [ -d "$JS_FILES_DIR" ]; then
-    echo -e "${BLUE}[+] LinkFinder çalıştırılıyor...${NC}"
+    echo -e "${BLUE}[+] Running LinkFinder...${NC}"
     mkdir -p "$JS_ANALYSIS_DIR/linkfinder_results"
     find "$JS_FILES_DIR" -name "*.js" | while read -r js_file; do
         filename=$(basename "$js_file")
@@ -105,12 +104,12 @@ if command -v linkfinder &> /dev/null  && [ -d "$JS_FILES_DIR" ]; then
     done
     
     LF_FILES_COUNT=$(find "$JS_ANALYSIS_DIR/linkfinder_results" -name "*.html" | wc -l)
-    echo -e "${GREEN}[+] LinkFinder tamamlandı: $LF_FILES_COUNT dosya analiz edildi${NC}"
+    echo -e "${GREEN}[+] LinkFinder completed: $LF_FILES_COUNT files analyzed${NC}"
 else
-    echo -e "${RED}[-] LinkFinder bulunamadı veya JavaScript dosyaları mevcut değil${NC}"
+    echo -e "${RED}[-] LinkFinder not found or JavaScript files not available${NC}"
 fi
 
-# Süre formatı fonksiyonu
+# Time format function
 format_time() {
     local seconds=$1
     local minutes=$((seconds / 60))
@@ -120,10 +119,10 @@ format_time() {
     printf "%02d:%02d:%02d" $hours $minutes $seconds
 }
 
-# Modül sonunda toplam süreyi hesapla ve göster
+# Calculate and show total time at the end of the module
 END_TIME=$(date +%s)
 TOTAL_TIME=$((END_TIME - START_TIME))
 TOTAL_TIME_FORMATTED=$(format_time $TOTAL_TIME)
-echo -e "${CYAN}[+] Toplam JavaScript analiz süresi: ${TOTAL_TIME_FORMATTED}${NC}"
+echo -e "${CYAN}[+] Total JavaScript analysis time: ${TOTAL_TIME_FORMATTED}${NC}"
 
-echo -e "${GREEN}###------- JavaScript analizi tamamlandı: $DOMAIN -------###${NC}" 
+echo -e "${GREEN}###------- JavaScript analysis completed: $DOMAIN -------###${NC}" 

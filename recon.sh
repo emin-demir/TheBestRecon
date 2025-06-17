@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# TheBestRecon - Kapsamlı Recon Aracı
-# Tüm modülleri kontrol eden ana betik
+# TheBestRecon - Comprehensive Recon Tool
+# Main script that controls all modules
 
-# Renk tanımlamaları
+# Color definitions
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 BLUE='\033[0;34m'
@@ -21,17 +21,17 @@ echo "    | |  | '_ \ / _ \  _ < / _ \/ __| __|  _  // _ \/ __/ _ \| '_ \ "
 echo "    | |  | | | |  __/ |_) |  __/\__ \ |_| | \ \  __/ (_| (_) | | | |"
 echo "    |_|  |_| |_|\___|____/ \___||___/\__|_|  \_\___|\___\___/|_| |_|"
 echo -e "${NC}"
-echo -e "${YELLOW}Kapsamlı Recon Aracı${NC}"
+echo -e "${YELLOW}Comprehensive Recon Tool${NC}"
 echo -e "${YELLOW}------------------------------------------${NC}"
 echo ""
 
-# Loglama fonksiyonu
+# Logging function
 log() {
     local log_level=$1
     local message=$2
     local timestamp=$(date +"%Y-%m-%d %H:%M:%S")
     
-    # Ekrana yazdır
+    # Print to screen
     case $log_level in
         "INFO")
             echo -e "${BLUE}[+] ${message}${NC}"
@@ -47,43 +47,43 @@ log() {
             ;;
     esac
     
-    # Log dosyasına yaz
+    # Write to log file
     mkdir -p logs
     echo "[$timestamp] [$log_level] $message" >> "logs/recon_$(date +%Y%m%d).log"
 }
 
-# Fonksiyonlar
+# Functions
 show_help() {
-    echo -e "${YELLOW}TheBestRecon - Kapsamlı Recon Aracı${NC}"
+    echo -e "${YELLOW}TheBestRecon - Comprehensive Recon Tool${NC}"
     echo ""
-    echo -e "Kullanım: ${CYAN}$0 [seçenekler]${NC}"
+    echo -e "Usage: ${CYAN}$0 [options]${NC}"
     echo ""
-    echo -e "${BLUE}Seçenekler:${NC}"
-    echo -e "  ${GREEN}-d, --domain${NC} <domain>        Hedef domain (zorunlu, birden fazla belirtilebilir fakat tavsiye edilmez.)"
-    echo -e "  ${GREEN}-o, --output${NC} <dizin>         Çıktı dizini (varsayılan: output/)"
-    echo -e "  ${GREEN}-h, --help${NC}                   Kullanım talimatları (Help Menüsü)"
-    echo -e "  ${GREEN}-a, --api-config${NC} <dosya>     API anahtarları için yapılandırma dosyası"
+    echo -e "${BLUE}Options:${NC}"
+    echo -e "  ${GREEN}-d, --domain${NC} <domain>        Target domain (required, multiple can be specified but not recommended)"
+    echo -e "  ${GREEN}-o, --output${NC} <directory>     Output directory (default: output/)"
+    echo -e "  ${GREEN}-h, --help${NC}                   Usage instructions (Help Menu)"
+    echo -e "  ${GREEN}-a, --api-config${NC} <file>      Configuration file for API keys"
     echo ""
-    echo -e "${BLUE}Tarama Modları:${NC}"
-    echo -e "  ${MAGENTA}--short-scan${NC}               Kısa tarama - Sadece kritik öneme sahip 10 subdomaini tarar"
-    echo -e "  ${MAGENTA}--medium-scan${NC}              Orta tarama - 30-50 önemli subdomaini tarar"
-    echo -e "  ${MAGENTA}--big-scan${NC}                 Büyük tarama - Tüm subdomainleri tarar (varsayılan)"
+    echo -e "${BLUE}Scan Modes:${NC}"
+    echo -e "  ${MAGENTA}--short-scan${NC}               Short scan - Only scans 10 critical subdomains"
+    echo -e "  ${MAGENTA}--medium-scan${NC}              Medium scan - Scans 30-50 important subdomains"
+    echo -e "  ${MAGENTA}--big-scan${NC}                 Big scan - Scans all subdomains (default)"
     echo ""
-    echo -e "${BLUE}Modüller:${NC}"
-    echo -e "  ${CYAN}--all-modules, -all${NC}          Tüm modülleri çalıştır"
-    echo -e "  ${CYAN}--sub-enum, -sE${NC}              Subdomain enumeration çalıştır (assetfinder, subfinder, sublist3r, vb)"
-    echo -e "  ${CYAN}--sub-brute, -sB${NC}             Subdomain bruteforce çalıştır (gobuster, amass)"
-    echo -e "  ${CYAN}--subs-live, -sL${NC}             Canlı subdomain kontrolü çalıştır (httpx, httprobe)"
-    echo -e "  ${CYAN}--screen-shoot, -sS${NC}          Ekran görüntüsü al (aquatone)"
-    echo -e "  ${CYAN}--url-discovery, -uD${NC}         URL Keşfi çalıştır (gau, waymore, katana, feroxbuster vb.)"
-    echo -e "  ${CYAN}--js-discovery, -jD${NC}          JavaScript dosyalarını keşfet (subjs, getJS, Secretfinder)"
-    echo -e "  ${CYAN}--param-discovery, -pD${NC}       Parametre keşfi çalıştır (ParamSpider, Arjun)"
-    echo -e "  ${CYAN}--js-analysis, -jS${NC}           JavaScript dosyalarında değerli veriler aranır. (TruffleHog, Linkfinder, Grep)"
-    echo -e "  ${CYAN}--param-analysis, -pmS${NC}        Parametreler üzerinde XSS zafiyet tespiti yapar (KXSS, Dalfox, XSStrike)"
-    echo -e "  ${CYAN}--port-scan, -pS${NC}             Port tarama çalıştır (nmap, masscan, naabu)"
-    echo -e "  ${CYAN}--vuln-scan, -vS${NC}             Zafiyet tarama çalıştır (nuclei, corscanner, smuggler, bfac)"
+    echo -e "${BLUE}Modules:${NC}"
+    echo -e "  ${CYAN}--all-modules, -all${NC}          Run all modules"
+    echo -e "  ${CYAN}--sub-enum, -sE${NC}              Run subdomain enumeration (assetfinder, subfinder, sublist3r, etc)"
+    echo -e "  ${CYAN}--sub-brute, -sB${NC}             Run subdomain bruteforce (gobuster, amass)"
+    echo -e "  ${CYAN}--subs-live, -sL${NC}             Run live subdomain check (httpx, httprobe)"
+    echo -e "  ${CYAN}--screen-shoot, -sS${NC}          Take screenshots (aquatone)"
+    echo -e "  ${CYAN}--url-discovery, -uD${NC}         Run URL Discovery (gau, waymore, katana, feroxbuster etc.)"
+    echo -e "  ${CYAN}--js-discovery, -jD${NC}          Discover JavaScript files (subjs, getJS, Secretfinder)"
+    echo -e "  ${CYAN}--param-discovery, -pD${NC}       Run parameter discovery (ParamSpider, Arjun)"
+    echo -e "  ${CYAN}--js-analysis, -jS${NC}           Search for valuable data in JavaScript files (TruffleHog, Linkfinder, Grep)"
+    echo -e "  ${CYAN}--param-analysis, -pmS${NC}        Performs XSS vulnerability detection on parameters (KXSS, Dalfox, XSStrike)"
+    echo -e "  ${CYAN}--port-scan, -pS${NC}             Run port scanning (nmap, masscan, naabu)"
+    echo -e "  ${CYAN}--vuln-scan, -vS${NC}             Run vulnerability scanning (nuclei, corscanner, smuggler, bfac)"
     echo ""
-    echo -e "${YELLOW}Örnekler:${NC}"
+    echo -e "${YELLOW}Examples:${NC}"
     echo -e "  ${CYAN}$0 -d example.com -sE -pS${NC}"
     echo -e "  ${CYAN}$0 -d example.com --short-scan -all ${NC}"
     echo -e "  ${CYAN}$0 -d example.com --medium-scan -vS ${NC}"
@@ -93,11 +93,10 @@ show_help() {
     exit 0
 }
 
-
-# Değişkenler
+# Variables
 DOMAINS=()
 OUTPUT_DIR="output"
-# Sabit API config dosyası
+# Fixed API config file
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 API_CONFIG="$SCRIPT_DIR/config/config.json"
 SUB_ENUM=false
@@ -112,22 +111,22 @@ URL_DISCOVERY=false
 JS_DISCOVERY=false
 PARAM_DISCOVERY=false
 ALL_MODULES=false
-# Tarama modunu belirle (varsayılan: big)
+# Determine scan mode (default: big)
 SCAN_MODE="big"
 
-# Parametre kontrolü
+# Parameter check
 if [[ $# -eq 0 ]]; then
     show_help
 fi
 
-# Ana dizin kontrolü
+# Main directory check
 if [[ ! -d "modules" ]]; then
-    log "ERROR" "'modules' dizini bulunamadı"
-    log "ERROR" "Bu betiği TheBestRecon ana dizininde çalıştırın"
+    log "ERROR" "'modules' directory not found"
+    log "ERROR" "Run this script in the TheBestRecon root directory"
     exit 1
 fi
 
-# Parametreleri işle
+# Process parameters
 while [[ $# -gt 0 ]]; do
     key="$1"
     case $key in
@@ -142,8 +141,8 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         -a|--api-config)
-            # API_CONFIG parametresi artık kullanılmıyor, sabit değer kullanılıyor
-            log "WARNING" "-a parametresi göz ardı ediliyor. Sabit API config dosyası kullanılıyor: $API_CONFIG"
+            # API_CONFIG parameter is no longer used, using fixed value
+            log "WARNING" "-a parameter is being ignored. Using fixed API config file: $API_CONFIG"
             shift
             shift
             ;;
@@ -211,19 +210,19 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         *)
-            log "ERROR" "Bilinmeyen parametre: $1"
+            log "ERROR" "Unknown parameter: $1"
             show_help
             ;;
     esac
 done
 
-# Domain parametresi kontrolü
+# Domain parameter check
 if [[ ${#DOMAINS[@]} -eq 0 ]]; then
-    log "ERROR" "En az bir domain parametresi gerekli"
+    log "ERROR" "At least one domain parameter is required"
     show_help
 fi
 
-# Tüm modüller seçilmişse
+# If all modules are selected
 if $ALL_MODULES; then
     SUB_ENUM=true
     SUB_BRUTE=true
@@ -238,49 +237,49 @@ if $ALL_MODULES; then
     PARAM_DISCOVERY=true
 fi
 
-# Output dizinini hazırla
+# Prepare output directory
 mkdir -p "$OUTPUT_DIR"
 
-# Python sanal ortamını aktif et
+# Activate Python virtual environment
 VENV_PATH="$SCRIPT_DIR/venv"
 VENV_ACTIVATE="$VENV_PATH/bin/activate"
 
-# Sanal ortam kontrolü ve aktivasyonu
+# Virtual environment check and activation
 if [ -d "$VENV_PATH" ] && [ -f "$VENV_ACTIVATE" ]; then
-    echo -e "\033[0;34m[+] Python sanal ortamı aktif ediliyor...\033[0m"
+    echo -e "\033[0;34m[+] Activating Python virtual environment...\033[0m"
     source "$VENV_ACTIVATE"
-    echo -e "\033[0;32m[+] Python sanal ortamı aktif edildi\033[0m"
+    echo -e "\033[0;32m[+] Python virtual environment activated\033[0m"
 else
-    echo -e "\033[0;31m[-] Python sanal ortamı bulunamadı: $VENV_ACTIVATE\033[0m"
-    echo -e "\033[0;33m[!] Lütfen önce install_tools.sh çalıştırarak gerekli ortamı kurun.\033[0m"
+    echo -e "\033[0;31m[-] Python virtual environment not found: $VENV_ACTIVATE\033[0m"
+    echo -e "\033[0;33m[!] Please run install_tools.sh first to install the required environment.\033[0m"
 fi
 
-# Seçilen tarama modunu ekrana yazdır
+# Selected scan mode
 case $SCAN_MODE in
     "short")
-        log "INFO" "Kısa tarama modu seçildi - Sadece kritik öneme sahip subdomainler taranacak"
+        log "INFO" "Selected short scan mode - Only scans 10 critical subdomains"
         ;;
     "medium")
-        log "INFO" "Orta tarama modu seçildi - Önemli subdomainler taranacak"
+        log "INFO" "Selected medium scan mode - Scans 30-50 important subdomains"
         ;;
     "big")
-        log "INFO" "Büyük tarama modu seçildi - Tüm subdomainler taranacak"
+        log "INFO" "Selected big scan mode - Scans all subdomains"
         ;;
 esac
 
-# Her domain için işlemleri sırayla çalıştır
+# Process each domain
 for domain in "${DOMAINS[@]}"; do
-    log "INFO" " Hedef domain işleniyor: $domain "
-    # Zaman damgasını sadece tarih olarak değiştir (GG-AA-YYYY formatında)
+    log "INFO" " Processing target domain: $domain "
+    # Use only date in timestamp (GG-AA-YYYY format)
     datestamp=$(date +%d-%m-%Y)
     domain_output_dir="${OUTPUT_DIR}/${domain}_${datestamp}"
     mkdir -p "$domain_output_dir"
     
-    log "INFO" " Sonuçlar şu dizine kaydedilecek: $domain_output_dir "
+    log "INFO" " Results will be saved to: $domain_output_dir "
     
     # 1. Subdomain Enumeration
     if $SUB_ENUM; then
-        # Eğer SUB_BRUTE aktifse, subdomain_enum içindeki dnsx'i atla
+        # If SUB_BRUTE is active, skip dnsx in subdomain_enum
         SKIP_DNSX_PARAM=""
         if $SUB_BRUTE; then
             SKIP_DNSX_PARAM="--skip-dnsx"
@@ -289,12 +288,12 @@ for domain in "${DOMAINS[@]}"; do
         bash modules/subdomain_enum.sh "$domain" -a "$API_CONFIG" -o "$domain_output_dir" $SKIP_DNSX_PARAM
     fi
     
-    # 2. Subdomain Bruteforce - DNS Bruteforce dahil
+    # 2. Subdomain Bruteforce - DNS Bruteforce included
     if $SUB_BRUTE; then
         bash modules/subdomain_brute.sh "$domain" -o "$domain_output_dir"
     fi
     
-    # 3. Subdomain Live Check ve Screenshot
+    # 3. Subdomain Live Check and Screenshot
     if $SUBS_LIVE || $SCREEN_SHOOT; then
         LIVE_PARAM=""
         SCREENSHOT_PARAM=""
@@ -310,21 +309,21 @@ for domain in "${DOMAINS[@]}"; do
         bash modules/live_and_screenshot.sh "$domain" -o "$domain_output_dir" $LIVE_PARAM $SCREENSHOT_PARAM
     fi
     
-    # Subdomain taraması yapılmış mı kontrol et
+    # Check if subdomain scanning was performed
     SUBDOMAIN_SCANNED=false
     if $SUB_ENUM || $SUB_BRUTE || $SUBS_LIVE; then
         SUBDOMAIN_SCANNED=true
     fi
     
-    # Diğer modüller çalıştırılacak mı kontrol et
+    # Check if other modules need to be run
     NEED_URL_FILTERING=false
     if $VULN_SCAN || $URL_DISCOVERY || $JS_DISCOVERY || $PARAM_DISCOVERY; then
         NEED_URL_FILTERING=true
     fi
     
-    # Subdomain taraması ve diğer modüller çalıştırılacaksa, URL filtreleme modülünü çalıştır
+    # If subdomain scanning and other modules need to be run, run URL filtering module
     if $SUBDOMAIN_SCANNED || $NEED_URL_FILTERING; then
-        log "INFO" "Subdomain taraması yapıldı ve gerekli modüller çalıştırılacak - URL filtreleme modülü çalıştırılıyor"
+        log "INFO" "Subdomain scanning performed and other required modules run - Running URL filtering module"
         bash modules/filter_urls.sh "$domain" -o "$domain_output_dir"
     fi
     
@@ -333,7 +332,7 @@ for domain in "${DOMAINS[@]}"; do
         bash modules/url_discovery.sh "$domain" -o "$domain_output_dir" --scan-mode "$SCAN_MODE"
     fi
     
-    # 5. JavaScript ve Parameter Discovery
+    # 5. JavaScript and Parameter Discovery
     if $JS_DISCOVERY || $PARAM_DISCOVERY; then
         JS_FLAG=""
         PARAM_FLAG=""
@@ -370,4 +369,4 @@ for domain in "${DOMAINS[@]}"; do
     fi
 done
 
-log "SUCCESS" "###------- TheBestRecon tamamlandı. Sonuçlar: $OUTPUT_DIR -------###" 
+log "SUCCESS" "###------- TheBestRecon completed. Results: $OUTPUT_DIR -------###" 

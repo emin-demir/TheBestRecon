@@ -1,95 +1,105 @@
 # TheBestRecon
-Recon, Discovery, Port scan, Vulnerability scan toollarını kullanıp hepsini birbiriyle uyumlu bir şekilde çalıştırıp bütün işi kolaylaştıran bir sistemdir. 
+A system that makes all the work easier by using Recon, Discovery, Port scan, Vulnerability scan tools and running them all in a compatible way.
 
-### Neden ?
-Piyasaya baktım hepsini çalıştırabileceğim tek bir otomatize tool bulamadım kendim yapmaya karar verdim.
+### Why?
+I looked at the market and couldn't find a single automated tool that could run all of them, so I decided to make one myself.
 
-## Ne İşe Yarar? 
+## What Does It Do?
 
-- ✅ Subdomain keşfi yapar
-- ✅ Canlı subdomainleri bulur
-- ✅ URL'leri keşfeder
-- ✅ JavaScript dosyalarını analiz eder
-- ✅ Parametreleri bulur ve XSS tarar
-- ✅ Port taraması yapar
-- ✅ Zafiyet taraması yapar
+- ✅ Performs subdomain discovery
+- ✅ Finds live subdomains
+- ✅ Discovers URLs
+- ✅ Analyzes JavaScript files
+- ✅ Finds parameters and scans for XSS
+- ✅ Performs port scanning
+- ✅ Performs vulnerability scanning
 
-## Kurulum 🔧
+## Installation 🔧
 
 ```bash
-# Repoyu indir
+# Clone the repo
 git clone https://github.com/emin-demir/TheBestRecon.git
 cd TheBestRecon
 
-# Araçları kur
+# Install tools
 chmod +x install_tools.sh
 sudo ./install_tools.sh
 
-# Çalıştırma izni ver
+# Give execution permission
 chmod +x recon.sh
 chmod +x modules/*.sh
 ```
 
-## Kullanım :
+## Usage
 
 ```bash
-# Temel kullanım
-./recon.sh hedef.com
+Usage: ./recon.sh [options]
 
-# Tüm modülleri çalıştır
-./recon.sh hedef.com -a
+Options:
+  -d, --domain <domain>        Target domain (required, multiple can be specified but not recommended)
+  -o, --output <directory>     Output directory (default: output/)
+  -h, --help                   Usage instructions (Help Menu)
+  -a, --api-config <file>      Configuration file for API keys
 
-# Sadece subdomain keşfi
-./recon.sh hedef.com --sub-enum
+Scan Modes:
+  --short-scan                 Short scan - Only scans 10 critical subdomains
+  --medium-scan                Medium scan - Scans 30-50 important subdomains
+  --big-scan                   Big scan - Scans all subdomains (default)
+
+Modules:
+  --all-modules, -all         Run all modules
+  --sub-enum, -sE             Run subdomain enumeration (assetfinder, subfinder, sublist3r, etc)
+  --sub-brute, -sB            Run subdomain bruteforce (gobuster, amass)
+  --subs-live, -sL            Run live subdomain check (httpx, httprobe)
+  --screen-shoot, -sS         Take screenshots (aquatone)
+  --url-discovery, -uD        Run URL Discovery (gau, waymore, katana, feroxbuster etc.)
+  --js-discovery, -jD         Discover JavaScript files (subjs, getJS, Secretfinder)
+  --param-discovery, -pD      Run parameter discovery (ParamSpider, Arjun)
+  --js-analysis, -jS          Search for valuable data in JavaScript files (TruffleHog, Linkfinder, Grep)
+  --param-analysis, -pmS      Performs XSS vulnerability detection on parameters (KXSS, Dalfox, XSStrike)
+  --port-scan, -pS            Run port scanning (nmap, masscan, naabu)
+  --vuln-scan, -vS            Run vulnerability scanning (nuclei, corscanner, smuggler, bfac)
+
+Examples:
+  ./recon.sh -d example.com -sE -pS
+  ./recon.sh -d example.com --short-scan -all
+  ./recon.sh -d example.com --medium-scan -vS
+  ./recon.sh -d example.com -d example2.com -all
+  ./recon.sh -d example.com -all -a api_keys.txt
+  ./recon.sh -d example.com -sE -sL -sS -uD -jD -pD
 ```
-Tool için python environment kullanıldığı için çalıştırmak için installing_tools.sh kurulumu sonrasında bir komut veriyor. 
-source /root/Desktop/TheBestRecon/venv/bin/activate gibi. Eğer python komutları çalışmazsa python environment ' ini kullanmayı unutmayın.
 
-## Parametreler
+Since a python environment is used for the tool, after installing_tools.sh installation, it gives a command like source /root/Desktop/TheBestRecon/venv/bin/activate. If python commands don't work, don't forget to use the python environment.
 
-| Parametre | Açıklama |
-|-----------|----------|
-| `-a`, `--all` | Tüm modülleri çalıştır |
-| `--sub-enum` | Subdomain enumeration |
-| `--sub-brute` | Subdomain bruteforce |
-| `--subs-live` | Canlı subdomain kontrolü |
-| `--url-discovery` | URL keşfi |
-| `--js-discovery` | JavaScript keşfi |
-| `--param-discovery` | Parametre keşfi |
-| `--js-analysis` | JavaScript analizi |
-| `--param-analysis` | Parametre analizi |
-| `--port-scan` | Port taraması |
-| `--vuln-scan` | Zafiyet taraması |
+## Tools Used
 
-## Kullanılan Araçlar
+### Subdomain Discovery
+- Subfinder, Assetfinder, Amass, Sublist3rV2, Shuffledns, Github-subdomains, Gobuster
 
-### Subdomain Keşfi
-- Subfinder, Assetfinder, Amass, Findomain, Sublist3r, crobat, Shosubgo, Shuffledns, Github-subdomains
+### URL Discovery
+- Gau, Waymore, Katana
 
-### URL Keşfi
-- Gau, Waymore, Fuzzuli, Feroxbuster, Katana, Hakrawler, Gospider
+### JavaScript and Parameter Discovery
+- ParamSpider, Arjun, subjs, getJS, x8
 
-### JavaScript ve Parametre Keşfi
-- ParamSpider, x8, Arjun
+### JavaScript Analysis
+- TruffleHog, LinkFinder, Regex Search
 
-### JavaScript Analizi
-- SecretFinder, TruffleHog, LinkFinder
-
-### Parametre Analizi
+### Parameter Analysis
 - kXSS, XSStrike, Dalfox
 
-### Port Tarama
+### Port Scanning
 - Naabu, Nmap
 
-### Zafiyet Tarama
-- Nuclei, Smuggler, BFAC, GoChopChop, Snallygaster, LazyHunter, CORScanner
+### Vulnerability Scanning
+- Nuclei, LazyHunter, HTTP, GoChopChop, Smuggler, Snallygaster, BFAC
 
-## Çıktılar 
+## Outputs
 
-Bütün sonuçlar `output/hedef.com_YYYYMMDD_HHMMSS/` altında düzenli bir şekilde saklanır:
+All results are stored in an organized way under `output/target.com_YYYYMMDD_HHMMSS/`:
 
 ```
-output/hedef.com_20230421_120000/
+output/target.com_20230421_120000/
 ├── subdomain_enum/
 ├── subdomain_brute/
 ├── subs_live/
@@ -101,31 +111,34 @@ output/hedef.com_20230421_120000/
 └── vuln_scan/
 ```
 
-## Örnek Kullanım Senaryoları 
+## Example Usage Scenarios
 
-### Tam Kapsamlı Tarama
+### Comprehensive Scan
 ```bash
-./recon.sh example.com -a
+./recon.sh -d example.com -all
+# But -all parameters are very slow. So be careful
 ```
 
-### Sadece Zafiyet Taraması
+### Only Vulnerability Scan
 ```bash
-./recon.sh example.com --vuln-scan
+./recon.sh -d example.com --vuln-scan
 ```
 
-### Subdomain Keşfi ve Canlı Kontrol
+### Subdomain Discovery and Live Check
 ```bash
-./recon.sh example.com --sub-enum --subs-live
+./recon.sh -d example.com --sub-enum --subs-live
 ```
 
-## Sorumluluk Reddi 
+## Disclaimer
 
-Bu aracı **SADECE** izin verilen sistemlerde kullanın! Yasa dışı kullanımdan doğacak her türlü sonuçtan kullanıcı sorumludur. Bu araç test ve güvenlik araştırmaları amacıyla geliştirilmiştir, kötü niyetli kullanım için değil.
+Use this tool **ONLY** on systems you have permission to test! The user is responsible for any consequences arising from illegal use. This tool is developed for testing and security research purposes, not for malicious use. 
 
-> **Unutma:** Hack the planet, not the people!
+❗️❗️❗️ There may be some errors while the system is running. I recommend that you use the parameters one by one. Since it is still in the development phase, it may sometimes give errors.
 
-# Katkıda Bulunma
-"Bu toolun hakkını verelim." diyorsan PR aç, beraber geliştirelim!
+> **Remember:** Hack the planet, not the people!
+
+# Contributing
+If you say "Let's do justice to this tool", open a PR, let's develop it together!
 
 ---
 

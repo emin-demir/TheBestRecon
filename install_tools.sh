@@ -4,17 +4,17 @@ SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 # Exit on error
 set -e
 
-# Başlangıç zamanını kaydet
+# Save start time
 START_TIME=$(date +%s)
 
-# Renk tanımlamaları
+# Color definitions
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 BLUE='\033[0;34m'
 YELLOW='\033[0;33m'
 NC='\033[0m' # No Color
 
-# Python sanal ortam dizini
+# Python virtual environment directory
 VENV_DIR="$SCRIPT_DIR/venv"
 
 # Check for root privileges
@@ -29,15 +29,15 @@ echo -e "${BLUE}[+] Updating package lists...${NC}"
 apt-get update
 echo -e "${GREEN}[+] Package lists updated successfully${NC}"
 
-# Setup klasörü kontrolü
+# Setup directory check
 if [ -d "$SCRIPT_DIR/setup" ]; then
-    read -p "${RED}[?] 'setup' klasörü zaten mevcut. Silinsin mi? [Y/n] ${NC}" response
-    response=${response:-Y}  # Varsayılan değer Y
+    read -p "${RED}[?] 'setup' directory already exists. Delete it? [Y/n] ${NC}" response
+    response=${response:-Y}  # Default value Y
     if [[ "$response" =~ ^[Yy]$ ]]; then
-        echo -e "${BLUE}[+] 'setup' klasörü siliniyor...${NC}"
+        echo -e "${BLUE}[+] Deleting 'setup' directory...${NC}"
         rm -rf "$SCRIPT_DIR/setup"
     else
-        echo -e "${YELLOW}[!] İşlem iptal edildi. Kuruluma devam ediliyor...${NC}"
+        echo -e "${YELLOW}[!] Operation cancelled. Continuing with installation...${NC}"
     fi
 fi
 
@@ -49,10 +49,10 @@ if ! command -v python3 &> /dev/null; then
 else
     apt-get install -y python3-venv
     echo -e "${GREEN}[+] Python3 already installed${NC}"
-    # Python3-venv'in yüklü olduğundan emin olalım
+    # Make sure Python3-venv is installed
 fi
 
-# Python sanal ortamı kurulumu
+# Python virtual environment setup
 if [ ! -d "$VENV_DIR" ]; then
     echo -e "${BLUE}[+] Setting up Python virtual environment...${NC}"
     python3 -m venv "$VENV_DIR"
@@ -61,35 +61,35 @@ else
     echo -e "${GREEN}[+] Python virtual environment already exists at $VENV_DIR${NC}"
 fi
 
-# Sanal ortamı aktive et (shell script içinde source kullanılamaz, bu yüzden . operatörünü kullanıyoruz)
+# Activate virtual environment (can't use source in shell script, so we use . operator)
 echo -e "${BLUE}[+] Activating Python virtual environment...${NC}"
 . "$VENV_DIR/bin/activate"
 echo -e "${GREEN}[+] Python virtual environment activated${NC}"
 
-# pip güncelleme
+# Update pip
 echo -e "${BLUE}[+] Updating pip in virtual environment...${NC}"
 python -m pip install --upgrade pip
 echo -e "${GREEN}[+] pip updated successfully${NC}"
 
-# pipx kurulumu
+# Install pipx
 if ! command -v pipx &> /dev/null; then
     echo -e "${BLUE}[+] Installing pipx...${NC}"
     python -m pip install pipx
     echo -e "${GREEN}[+] pipx installed successfully${NC}"
     
-    # pipx path'i ayarla
+    # Setup pipx path
     echo -e "${BLUE}[+] Setting up pipx path...${NC}"
     pipx ensurepath
     echo -e "${GREEN}[+] pipx path setup completed${NC}"
 else
     echo -e "${GREEN}[+] pipx is already installed${NC}"
-    # Path'in doğru ayarlandığından emin ol
+    # Make sure path is set correctly
     pipx ensurepath
 fi
 
-# pipx kullanabilmek için PATH'i güncelleyelim
+# Update PATH to use pipx
 export PATH="$HOME/.local/bin:$PATH"
-# httpx ile python httpx karışmaması için python environmentinde olan kaldıralım.
+# Remove httpx from python environment to avoid confusion with httpx tool
 pip uninstall -y httpx 
 
 if ! command -v go &> /dev/null; then
@@ -97,7 +97,7 @@ if ! command -v go &> /dev/null; then
     apt install -y golang
     echo -e "${BLUE}[+] Adding Go to PATH...${NC}"
     
-    # Go PATH'i ekle
+    # Add Go PATH
     if ! grep -q "/usr/local/go/bin" ~/.bashrc; then
         echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
         echo 'export PATH=$PATH:~/go/bin' >> ~/.bashrc
@@ -108,7 +108,7 @@ if ! command -v go &> /dev/null; then
         echo 'export PATH=$PATH:~/go/bin' >> ~/.zshrc 2>/dev/null || true
     fi
     
-    # Geçici olarak PATH'e ekle
+    # Temporarily add to PATH
     export PATH=$PATH:/usr/local/go/bin
     export PATH=$PATH:~/go/bin
     
@@ -138,7 +138,6 @@ mkdir -p "$SCRIPT_DIR/setup"
 
 # Create array to track installation failures
 declare -a failed_tools
-
 
 # Install aria2 for JavaScript downloads
 echo -e "${BLUE}[+] Checking aria2...${NC}"
@@ -459,7 +458,7 @@ else
     fi
 fi
 
-# gf - Pattern finder (doğrudan GitHub'dan klonlayarak)
+# gf - Pattern finder 
 echo -e "${BLUE}[+] Installing gf...${NC}"
 
 # gf binary kontrolü
@@ -471,7 +470,7 @@ else
     echo -e "${BLUE}[+] gf binary not found, will install${NC}"
 fi
 
-# ~/.gf dizini kontrolü
+# ~/.gf folder control
 GF_DIR_EXISTS=false
 if [ -d ~/.gf ] && [ "$(ls -A ~/.gf 2>/dev/null)" ]; then
     echo -e "${GREEN}[+] ~/.gf directory already exists and has content${NC}"
@@ -480,7 +479,7 @@ else
     echo -e "${BLUE}[+] ~/.gf directory does not exist or is empty, will create/populate${NC}"
 fi
 
-# .zshrc içinde gf-completion kontrolü
+# .zshrc control
 GF_COMPLETION_EXISTS=false
 if grep -q "gf-completion.zsh" ~/.zshrc 2>/dev/null; then
     echo -e "${GREEN}[+] gf completion already exists in .zshrc${NC}"
@@ -489,7 +488,7 @@ else
     echo -e "${BLUE}[+] gf completion not found in .zshrc, will add${NC}"
 fi
 
-# .bashrc içinde gf-completion kontrolü
+# in .bashrc gf-completion control
 GF_BASH_COMPLETION_EXISTS=false
 if grep -q "gf-completion.bash" ~/.bashrc 2>/dev/null; then
     echo -e "${GREEN}[+] gf completion already exists in .bashrc${NC}"
@@ -498,7 +497,7 @@ else
     echo -e "${BLUE}[+] gf completion not found in .bashrc, will add${NC}"
 fi
 
-# /go/gf dizini kontrolü
+# /go/gf folder control
 GO_GF_DIR_EXISTS=false
 if [ -d /go/gf ] && [ "$(ls -A /go/gf 2>/dev/null)" ]; then
     echo -e "${GREEN}[+] /go/gf directory already exists and has content${NC}"
@@ -507,19 +506,19 @@ else
     echo -e "${BLUE}[+] /go/gf directory does not exist or is empty, will create/populate${NC}"
 fi
 
-# Eğer her şey tamam ise, kurulumu atla
+# If everything is ok, skip installation
 if $GF_INSTALLED && $GF_DIR_EXISTS && $GF_COMPLETION_EXISTS && $GF_BASH_COMPLETION_EXISTS && $GO_GF_DIR_EXISTS; then
     echo -e "${GREEN}[+] gf is fully installed and configured, skipping installation${NC}"
 else
-    # gf repo kontrolü
+    # gf repo control
     if [ ! -d "$SCRIPT_DIR/setup/gf" ] || [ ! -d "$SCRIPT_DIR/setup/gf/examples" ]; then
-        # Dizin var ama examples dizini yoksa, dizini sil
+        # If directory exists but examples directory does not exist, delete the directory
         if [ -d "$SCRIPT_DIR/setup/gf" ]; then
             echo -e "${BLUE}[+] gf directory exists but is incomplete, removing and re-cloning${NC}"
             rm -rf "$SCRIPT_DIR/setup/gf"
         fi
         
-        # Repo klonlama
+        # Repo cloning
         echo -e "${BLUE}[+] Cloning gf repository${NC}"
         if ! git clone https://github.com/tomnomnom/gf.git "$SCRIPT_DIR/setup/gf"; then
             echo -e "${RED}[-] Failed to clone gf repository${NC}"
@@ -533,7 +532,7 @@ else
         GF_REPO_CLONED=true
     fi
     
-    # Binary kurulumu
+    # Binary installation
     if ! $GF_INSTALLED && $GF_REPO_CLONED; then
         echo -e "${BLUE}[+] Installing gf binary${NC}"
         if ! go install -v github.com/tomnomnom/gf@latest; then
@@ -542,7 +541,7 @@ else
         fi
     fi
     
-    # ~/.gf dizini ve pattern dosyaları
+    # ~/.gf folder and pattern files
     if ! $GF_DIR_EXISTS && $GF_REPO_CLONED; then
         echo -e "${BLUE}[+] Creating ~/.gf directory and copying patterns${NC}"
         mkdir -p ~/.gf
@@ -553,7 +552,7 @@ else
         fi
     fi
     
-    # /go/gf dizini oluşturma ve completion dosyalarını kopyalama
+    # /go/gf folder creation and completion files copying
     if ! $GO_GF_DIR_EXISTS && $GF_REPO_CLONED; then
         echo -e "${BLUE}[+] Creating /go/gf directory and copying completion files${NC}"
         sudo mkdir -p /go/gf
@@ -664,9 +663,9 @@ else
     echo -e "${BLUE}[+] Installing Lazy-Hunter...${NC}"
     if [ -d "$SCRIPT_DIR/setup/Lazy-Hunter" ]; then
         echo -e "${YELLOW}[!] Lazy-Hunter directory exists, checking installation...${NC}"
-        # Dizin var ama symlink yok, symlink oluşturalım
+        # If directory exists but symlink does not exist, create symlink
         if [ -f "$SCRIPT_DIR/setup/Lazy-Hunter/lazyhunter.py" ]; then
-            # os.system("clear") komutunu kaldır
+            # Remove os.system("clear") command
             sed -i 's/os\.system("clear")/#os.system("clear")/g' "$SCRIPT_DIR/setup/Lazy-Hunter/lazyhunter.py"
             echo -e "${GREEN}[+] Removed os.system(\"clear\") command from lazyhunter.py${NC}"
             
@@ -675,13 +674,13 @@ else
             echo -e "${GREEN}[+] Lazy-Hunter symlink created successfully${NC}"
         else
             echo -e "${RED}[-] Lazy-Hunter script not found in the directory${NC}"
-            # Dizini temizleyelim ve yeniden yüklemeyi deneyelim
+            # if directory exists, clean it and try to reinstall
             rm -rf "$SCRIPT_DIR/setup/Lazy-Hunter"
             if git clone https://github.com/iamunixtz/Lazy-Hunter.git "$SCRIPT_DIR/setup/Lazy-Hunter" && \
                [ -f "$SCRIPT_DIR/setup/Lazy-Hunter/requirements.txt" ] && \
                pip install -r "$SCRIPT_DIR/setup/Lazy-Hunter/requirements.txt" && \
                [ -f "$SCRIPT_DIR/setup/Lazy-Hunter/lazyhunter.py" ]; then
-                # os.system("clear") komutunu kaldır
+                # Remove os.system("clear") command
                 sed -i 's/os\.system("clear")/#os.system("clear")/g' "$SCRIPT_DIR/setup/Lazy-Hunter/lazyhunter.py"
                 echo -e "${GREEN}[+] Removed os.system(\"clear\") command from lazyhunter.py${NC}"
                 
@@ -694,12 +693,12 @@ else
             fi
         fi
     else
-        # Dizin yok, tamamen yeni kurulum
+        # If directory does not exist, completely new installation
         if git clone https://github.com/iamunixtz/Lazy-Hunter.git "$SCRIPT_DIR/setup/Lazy-Hunter" && \
            [ -f "$SCRIPT_DIR/setup/Lazy-Hunter/requirements.txt" ] && \
            pip install -r "$SCRIPT_DIR/setup/Lazy-Hunter/requirements.txt" && \
            [ -f "$SCRIPT_DIR/setup/Lazy-Hunter/lazyhunter.py" ]; then
-            # os.system("clear") komutunu kaldır
+            # Remove os.system("clear") command
             sed -i 's/os\.system("clear")/#os.system("clear")/g' "$SCRIPT_DIR/setup/Lazy-Hunter/lazyhunter.py"
             echo -e "${GREEN}[+] Removed os.system(\"clear\") command from lazyhunter.py${NC}"
             
@@ -889,7 +888,7 @@ else
         echo -e "${YELLOW}[!] Pinkerton directory exists, checking installation...${NC}"
         if [ -f "$SCRIPT_DIR/setup/Pinkerton/main.py" ] && [ -f "$SCRIPT_DIR/setup/Pinkerton/requirements.txt" ]; then
             pip install -r "$SCRIPT_DIR/setup/Pinkerton/requirements.txt"
-            # Shebang satırını ekleme
+            # Add shebang line
             if ! grep -q "#!/usr/bin/python3" "$SCRIPT_DIR/setup/Pinkerton/main.py"; then
                 sed -i '1i#!/usr/bin/python3' "$SCRIPT_DIR/setup/Pinkerton/main.py"
             fi
@@ -1029,10 +1028,10 @@ else
             ln -sf "$SCRIPT_DIR/setup/LinkFinder/linkfinder.py" /usr/local/bin/linkfinder
             echo -e "${GREEN}[+] LinkFinder symlink created successfully${NC}"
             
-            # Web tarayıcı açma özelliklerini devre dışı bırak
+            # Disable web browser opening features
             sed -i 's/webbrowser.open(file)/#webbrowser.open(file)\neprint("")/g' "$SCRIPT_DIR/setup/LinkFinder/linkfinder.py"
             sed -i 's/subprocess.call(["xdg-open", file])/#subprocess.call(["xdg-open", file])\nprint("")/g' "$SCRIPT_DIR/setup/LinkFinder/linkfinder.py"
-            echo -e "${GREEN}[+] LinkFinder web tarayıcı açma özellikleri devre dışı bırakıldı${NC}"
+            echo -e "${GREEN}[+] LinkFinder web browser opening features disabled${NC}"
         else
             echo -e "${RED}[-] LinkFinder script or requirements not found in the directory${NC}"
             rm -rf "$SCRIPT_DIR/setup/LinkFinder"
@@ -1045,7 +1044,7 @@ else
                ln -sf "$SCRIPT_DIR/setup/LinkFinder/linkfinder.py" /usr/local/bin/linkfinder; then
                 echo -e "${GREEN}[+] LinkFinder installed successfully${NC}"
                 
-                # Web tarayıcı açma özelliklerini devre dışı bırak
+                # Disable web browser opening features
                 sed -i 's/webbrowser.open/#webbrowser.open\n/g' "$SCRIPT_DIR/setup/LinkFinder/linkfinder.py"
                 sed -i 's/subprocess.call(\["xdg-open"/#subprocess.call(\["xdg-open"\n/g' "$SCRIPT_DIR/setup/LinkFinder/linkfinder.py"
                 echo -e "${GREEN}[+] LinkFinder web tarayıcı açma özellikleri devre dışı bırakıldı${NC}"
@@ -1064,10 +1063,10 @@ else
            ln -sf "$SCRIPT_DIR/setup/LinkFinder/linkfinder.py" /usr/local/bin/linkfinder; then
             echo -e "${GREEN}[+] LinkFinder installed successfully${NC}"
             
-            # Web tarayıcı açma özelliklerini devre dışı bırak
+            # Disable web browser opening features
             sed -i 's/webbrowser.open/#webbrowser.open\n/g' "$SCRIPT_DIR/setup/LinkFinder/linkfinder.py"
             sed -i 's/subprocess.call(\["xdg-open"/#subprocess.call(\["xdg-open"\n/g' "$SCRIPT_DIR/setup/LinkFinder/linkfinder.py"
-            echo -e "${GREEN}[+] LinkFinder web tarayıcı açma özellikleri devre dışı bırakıldı${NC}"
+            echo -e "${GREEN}[+] LinkFinder web browser opening features disabled${NC}"
         else
             echo -e "${RED}[-] Failed to install LinkFinder${NC}"
             failed_tools+=("LinkFinder")
@@ -1313,7 +1312,7 @@ else
     if apt-get install -y naabu; then
         echo -e "${GREEN}[+] naabu installed successfully${NC}"
     else
-        # Eğer apt ile yüklenemezse, go install ile deneyelim
+        # If apt cannot install, try go install
         echo -e "${BLUE}[+] Trying to install naabu via go install...${NC}"
         if go install -v github.com/projectdiscovery/naabu/v2/cmd/naabu@latest; then
             echo -e "${GREEN}[+] naabu installed successfully via go${NC}"
@@ -1382,7 +1381,7 @@ if ! command -v cargo &> /dev/null; then
     }
 fi
 
-# PATH'e Cargo bin dizinini ekle
+# Add Cargo bin directory to PATH
 if ! grep -q "/.cargo/bin" ~/.bashrc; then
     echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> ~/.bashrc
     echo -e "${GREEN}[+] Added Cargo bin directory to PATH in .bashrc${NC}"
@@ -1393,7 +1392,7 @@ if ! grep -q "/.cargo/bin" ~/.zshrc 2>/dev/null; then
     echo -e "${GREEN}[+] Added Cargo bin directory to PATH in .zshrc (if exists)${NC}"
 fi
 
-# Geçici olarak PATH'e ekle
+# Temporarily add to PATH
 export PATH="$HOME/.cargo/bin:$PATH"
 
 
@@ -1402,7 +1401,7 @@ if command -v x8 &> /dev/null; then
     echo -e "${GREEN}[+] x8 is already installed${NC}"
 else
     echo -e "${BLUE}[+] Installing x8...${NC}"
-    # Önce x8 bağımlılıklarını yükle
+    # First install x8 dependencies
     if apt-get install -y pkg-config libssl-dev && \
        cargo install x8; then
         echo -e "${GREEN}[+] x8 installed successfully${NC}"
@@ -1430,7 +1429,7 @@ else
     echo -e "${RED}[!] Please check the logs above for more details and try to install these tools manually.${NC}"
 fi
 
-# Kurulum süresini hesapla
+# Calculate installation time
 END_TIME=$(date +%s)
 ELAPSED_TIME=$((END_TIME - START_TIME))
 MINUTES=$((ELAPSED_TIME / 60))
@@ -1439,7 +1438,7 @@ SECONDS=$((ELAPSED_TIME % 60))
 echo ""
 echo -e "${GREEN}[+] Installation process completed in ${MINUTES} minutes and ${SECONDS} seconds.${NC}"
 
-# Sanal ortamdan çık
+# Exit virtual environment
 deactivate
 
 # Remind user to source the updated profile
@@ -1447,6 +1446,6 @@ echo -e "${BLUE}[+] To use the installed tools in the current session, run:${NC}
 echo -e "${GREEN}    source ~/.bashrc${NC}"
 echo -e "${GREEN}    export PATH=\$PATH:/usr/local/go/bin:~/go/bin:\$HOME/.cargo/bin:\$HOME/.local/bin${NC}"
 
-# Sanal ortamı aktifleştirmek için bilgi
+# Information to activate the Python virtual environment
 echo -e "${YELLOW}[!] To activate the Python virtual environment, run:${NC}"
 echo -e "${GREEN}    source $VENV_DIR/bin/activate${NC}"
